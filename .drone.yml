@@ -34,8 +34,8 @@ steps:
 #   - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
 #   - echo "echo docker now available."
 #   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" docker.digital.homeoffice.gov.uk
-#   - docker tag egar-python-3:$${DRONE_COMMIT} docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
-#   - docker push docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
+#   - docker tag egar-python-3:$${DRONE_COMMIT} docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
+#   - docker push docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
 #   environment:
 #     DOCKER_PASSWORD:
 #       from_secret: DOCKER_PASSWORD
@@ -78,19 +78,42 @@ steps:
   settings:
     group: build-stage
 
+- name: Push image to artifactory
+  pull: if-not-exists
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
+  commands:
+  # Wait for the docker service to be up
+  - echo "Checking for docker availability."
+  - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
+  - echo "echo docker now available."
+  - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" docker.digital.homeoffice.gov.uk
+  - docker tag egar-python-3:$${DRONE_COMMIT} docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
+  - docker push docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
+  environment:
+    DOCKER_PASSWORD:
+      from_secret: DOCKER_PASSWORD
+    DOCKER_USERNAME:
+      from_secret: DOCKER_USERNAME
+  when:
+    branch:
+    - master
+    - feature/*
+    event:
+    - push
+
 - name: scan-newly-built-image
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
   pull: always
   failure: ignore
   environment:
-    IMAGE_NAME: quay.io/ukhomeofficedigital/egar-python-3:${DRONE_COMMIT}
+    IMAGE_NAME: docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
     TOLERATE: high
   when:
     event:
     - push
 
   depends_on:
-  - build_new_image_push_to_quay
+  - Push image to artifactory
 
 services:
   - name: docker
