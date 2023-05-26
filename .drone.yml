@@ -71,7 +71,7 @@ steps:
   - docker build -t egar-python-3:$${DRONE_COMMIT} .
   - docker tag egar-python-3:$${DRONE_COMMIT} $${DOCKER_REGISTRY_URL}/ukhomeofficedigital/egar-python-3:latest
   - docker push $${DOCKER_REGISTRY_URL}/ukhomeofficedigital/egar-python-3:latest
-  - docker push docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
+
   volumes:
     - name: dockersock
       path: /var/run
