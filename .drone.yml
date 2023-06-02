@@ -11,42 +11,6 @@ platform:
 
 steps:
 
-# - name: Build
-#   pull: if-not-exists
-#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
-#   commands: 
-#   # Wait for the docker service to be up
-#   - echo "Checking for docker availability."
-#   - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
-#   - echo "echo docker now available."
-#   - docker build -t egar-python-3:$${DRONE_COMMIT} .
-#   volumes:
-#   - name: dockersock
-#     path: /var/run
-
-
-# - name: Push image to artifactory
-#   pull: if-not-exists
-#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
-#   commands:
-#   # Wait for the docker service to be up
-#   - echo "Checking for docker availability."
-#   - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
-#   - echo "echo docker now available."
-#   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" docker.digital.homeoffice.gov.uk
-#   - docker tag egar-python-3:$${DRONE_COMMIT} docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
-#   - docker push docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
-#   environment:
-#     DOCKER_PASSWORD:
-#       from_secret: DOCKER_PASSWORD
-#     DOCKER_USERNAME:
-#       from_secret: DOCKER_USERNAME
-#   when:
-#     branch:
-#     - master
-#     - feature/*
-#     event:
-#     - push
 - name: build_new_image_push_to_quay
   pull: if-not-exists
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
@@ -78,21 +42,7 @@ steps:
   settings:
     group: build-stage
 
-# - name: Push image to ECR
-#   pull: if-not-exists
-#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/egar/python-3
-# - name: build_tag_ecr
-#   pull: if-not-exists
-#   image: plugins/ecr
-#   environment:
-#     AWS_REGION: eu-west-2
-#   settings:
-#     access_key:
-#       from_secret: AWS_ACCESS_KEY_ID
-#     secret_key:
-#       from_secret: AWS_SECRET_ACCESS_KEY
-#     repo: acp-induction/jonathan-2302
-#     registry: 340268328991.dkr.ecr.eu-west-2.amazonaws.com
+
 - name: Push image to artifactory
   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
   pull: always
@@ -110,8 +60,8 @@ steps:
   - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
   - echo "echo docker now available."
   # - docker login -u="$${DOCKER_ARTIFACT_USERNAME}" -p="$${DOCKER_ARTIFACT_PASSWORD}" docker.digital.homeoffice.gov.uk
-  - docker tag egar-python-3:$${DRONE_COMMIT} docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
-  - docker push docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
+  - docker tag egar-python-3:$${DRONE_COMMIT} docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
+  - docker push docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
   when:
     branch:
     - master
@@ -124,7 +74,7 @@ steps:
   pull: always
   failure: ignore
   environment:
-    IMAGE_NAME: docker.digital.homeoffice.gov.uk/egar/python-3:$${DRONE_COMMIT}
+    IMAGE_NAME: docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
     TOLERATE: high
   when:
     event:
