@@ -108,7 +108,7 @@ steps:
   pull: always
   failure: ignore
   environment:
-    IMAGE_NAME: quay.io/ukhomeofficedigital/egar-python-3:latest
+    IMAGE_NAME: docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
     TOLERATE: high
   when:
     event:
