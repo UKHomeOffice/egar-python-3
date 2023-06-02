@@ -78,16 +78,32 @@ steps:
   settings:
     group: build-stage
 
-- name: Push image to ECR
-  pull: if-not-exists
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/egar/python-3
-  # environment:
-  #   DOCKER_ARTIFACT_PASSWORD:
-  #     from_secret: DOCKER_ARTIFACT_PASSWORD
-  #   DOCKER_USERNAME:
-  #     from_secret: DOCKER_ARTIFACT_USERNAME
-  #   DOCKER_ARTIFACT_REGISTRY_URL:
-  #     from_secret: DOCKER_ARTIFACT_REGISTRY_URL
+# - name: Push image to ECR
+#   pull: if-not-exists
+#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/egar/python-3
+# - name: build_tag_ecr
+#   pull: if-not-exists
+#   image: plugins/ecr
+#   environment:
+#     AWS_REGION: eu-west-2
+#   settings:
+#     access_key:
+#       from_secret: AWS_ACCESS_KEY_ID
+#     secret_key:
+#       from_secret: AWS_SECRET_ACCESS_KEY
+#     repo: acp-induction/jonathan-2302
+#     registry: 340268328991.dkr.ecr.eu-west-2.amazonaws.com
+- name: Push image to artifactory
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
+  pull: always
+  failure: ignore
+  environment:
+    DOCKER_ARTIFACT_PASSWORD:
+      from_secret: DOCKER_ARTIFACT_PASSWORD
+    DOCKER_USERNAME:
+      from_secret: DOCKER_ARTIFACT_USERNAME
+    DOCKER_ARTIFACT_REGISTRY_URL:
+      from_secret: DOCKER_ARTIFACT_REGISTRY_URL
   commands:
   # Wait for the docker service to be up
   - echo "Checking for docker availability."
@@ -113,9 +129,6 @@ steps:
   when:
     event:
     - push
-
-  depends_on:
-  - build_new_image_push_to_quay
 
 services:
   - name: docker
