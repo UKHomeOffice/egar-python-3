@@ -80,7 +80,7 @@ steps:
 
 - name: Push image to ECR
   pull: if-not-exists
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
+  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/egar/python-3
   # environment:
   #   DOCKER_ARTIFACT_PASSWORD:
   #     from_secret: DOCKER_ARTIFACT_PASSWORD
