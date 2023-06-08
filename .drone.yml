@@ -61,7 +61,7 @@ steps:
   - echo "echo docker now available."
   - docker build -t egar-python-3:$${DRONE_COMMIT} .
   - docker tag egar-python-3:$${DRONE_COMMIT} docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
-  - docker login -u="egar-sit" -password-stdin=$${DOCKER_ARTIFACT_PASSWORD} docker.digital.homeoffice.gov.uk
+  - docker login -u="egar-sit" -p=$${DOCKER_ARTIFACT_PASSWORD} docker.digital.homeoffice.gov.uk
   - docker push docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
   when:
     branch:
