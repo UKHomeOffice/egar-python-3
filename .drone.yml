@@ -72,7 +72,7 @@ volumes:
 
 trigger:
   event:
-      - pull_request
+  - push
 
   # - name: scan-newly-built-image
   #   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
