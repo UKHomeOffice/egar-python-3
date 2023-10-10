@@ -11,127 +11,91 @@ platform:
 
 steps:
 
-# - name: Build
-#   pull: if-not-exists
-#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
-#   commands: 
-#   # Wait for the docker service to be up
-#   - echo "Checking for docker availability."
-#   - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
-#   - echo "echo docker now available."
-#   - docker build -t egar-python-3:$${DRONE_COMMIT} .
-#   volumes:
-#   - name: dockersock
-#     path: /var/run
-
-
-# - name: Push image to artifactory
-#   pull: if-not-exists
-#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
-#   commands:
-#   # Wait for the docker service to be up
-#   - echo "Checking for docker availability."
-#   - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
-#   - echo "echo docker now available."
-#   - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" docker.digital.homeoffice.gov.uk
-#   - docker tag egar-python-3:$${DRONE_COMMIT} docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
-#   - docker push docker.digital.homeoffice.gov.uk/egar/egar-python-3:$${DRONE_COMMIT}
-#   environment:
-#     DOCKER_PASSWORD:
-#       from_secret: DOCKER_PASSWORD
-#     DOCKER_USERNAME:
-#       from_secret: DOCKER_USERNAME
-#   when:
-#     branch:
-#     - master
-#     - feature/*
-#     event:
-#     - push
-- name: build_new_image_push_to_quay
-  pull: if-not-exists
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
-  environment:
-    DOCKER_PASSWORD:
-      from_secret: docker_password
-    DOCKER_USERNAME: ukhomeofficedigital+egar
-    DOCKER_REGISTRY_URL: quay.io
-    IMAGE_NAME: quay.io/ukhomeofficedigital/egar-python-3
-  when:
-    branch:
-    - master
-    - feature/*
-    event:
-    - push
+  - name: build_new_image_push_to_quay
+    pull: if-not-exists
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind:latest
+    environment:
+      DOCKER_PASSWORD:
+        from_secret: docker_password
+      DOCKER_USERNAME: ukhomeofficedigital+egar
+      DOCKER_REGISTRY_URL: quay.io
+      IMAGE_NAME: quay.io/ukhomeofficedigital/egar-python-3
+    when:
+      branch:
+      - master
+      - feature/*
+      event:
+      - push
 
 # trigger to push new build
-  commands:
+    commands:
   # Wait for the docker service to be up
-  - echo "Checking for docker availability."
-  - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
-  - echo "echo docker now available."
-  - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" quay.io
-  - docker build -t egar-python-3:$${DRONE_COMMIT} .
-  - docker tag egar-python-3:$${DRONE_COMMIT} $${DOCKER_REGISTRY_URL}/ukhomeofficedigital/egar-python-3:latest
-  - docker push $${DOCKER_REGISTRY_URL}/ukhomeofficedigital/egar-python-3:latest
-  volumes:
-    - name: dockersock
-      path: /var/run
-  settings:
-    group: build-stage
+    - echo "Checking for docker availability."
+    - n=0; while [ "$n" -lt 60 ] && ! docker stats --no-stream >/dev/null 2>&1; do n=$(( n + 1 )); sleep 1; done
+    - echo "echo docker now available."
+    - docker login -u="$${DOCKER_USERNAME}" -p="$${DOCKER_PASSWORD}" quay.io
+    - docker build -t egar-python-3:$${DRONE_COMMIT} .
+    - docker tag egar-python-3:$${DRONE_COMMIT} $${DOCKER_REGISTRY_URL}/ukhomeofficedigital/egar-python-3:latest
+    - docker push $${DOCKER_REGISTRY_URL}/ukhomeofficedigital/egar-python-3:latest
+    volumes:
+      - name: dockersock
+        path: /var/run
+    settings:
+      group: build-stage
 
 
-- name: scan-image
-  pull: always
-  image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/trivy/client:latest
-  resources: 
-    limits:
-      cpu: 1000
-      memory: 1024Mi
-  environment: 
-    IMAGE_NAME: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/sas/refugee-integration-loans:2ff2ffc035d64656a2a253fb336d0e45ff14a6c9
-    TOLERATE: high
-    IGNORE_UNFIXED: true
-      #Henry Senior - April  27th 2023. Whitelisted CVE-2019-8457 as it appears to be a SqlLite vulnerability.
-    WHITELIST: CVE-2015-20107, CVE-2021-35942, CVE-2022-23219, CVE-2022-23219, CVE-2019-13224, CVE-2021-33574, CVE-2021-33574, CVE-2022-23218, CVE-2022-23219, CVE-2022-23219, CVE-2015-20107, CVE-2022-23218, CVE-2021-33574, CVE-2021-35942, CVE-2015-20107, CVE-2019-8457, CVE-2022-23218, CVE-2021-35942, CVE-2015-20107, CVE-2021-33574, CVE-2021-35942, CVE-2022-23218, CVE-2019-8457, GHSA-2jcg-qqmg-46q6
-  when:
-    event:
-    - push
+  - name: scan-image
+    pull: always
+    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/trivy/client:latest
+    resources: 
+      limits:
+        cpu: 1000
+        memory: 1024Mi
+    environment: 
+      IMAGE_NAME: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/sas/refugee-integration-loans:2ff2ffc035d64656a2a253fb336d0e45ff14a6c9
+      TOLERATE: high
+      IGNORE_UNFIXED: true
+        #Henry Senior - April  27th 2023. Whitelisted CVE-2019-8457 as it appears to be a SqlLite vulnerability.
+      WHITELIST: CVE-2015-20107, CVE-2021-35942, CVE-2022-23219, CVE-2022-23219, CVE-2019-13224, CVE-2021-33574, CVE-2021-33574, CVE-2022-23218, CVE-2022-23219, CVE-2022-23219, CVE-2015-20107, CVE-2022-23218, CVE-2021-33574, CVE-2021-35942, CVE-2015-20107, CVE-2019-8457, CVE-2022-23218, CVE-2021-35942, CVE-2015-20107, CVE-2021-33574, CVE-2021-35942, CVE-2022-23218, CVE-2019-8457, GHSA-2jcg-qqmg-46q6
+    when:
+      event:
+      - push
 
 services:
-  - name: docker
-    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+ - name: docker
+   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
 
 
 volumes:
-  - name: dockersock
-    temp: {}
+ - name: dockersock
+   temp: {}
 
 trigger:
   event:
-    - pull_request
+      - pull_request
 
-# - name: scan-newly-built-image
-#   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
-#   pull: always
-#   failure: ignore
-#   environment:
-#     TOLERATE: high
-#   when:
-#     event:
-#     - push
+  # - name: scan-newly-built-image
+  #   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
+  #   pull: always
+  #   failure: ignore
+  #   environment:
+  #     TOLERATE: high
+  #   when:
+  #     event:
+  #     - push
 
-#   # depends_on:
-#   # - build_new_image_push_to_quay
+  #   # depends_on:
+  #   # - build_new_image_push_to_quay
 
-  services:
-  - name: docker
-    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
-  - name: anchore-submission-server
-    image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
-    pull: always
-    commands:
-      - /run.sh server
+    # services:
+    # - name: docker
+    #   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/dind
+    # - name: anchore-submission-server
+    #   image: 340268328991.dkr.ecr.eu-west-2.amazonaws.com/acp/anchore-submission:latest
+    #   pull: always
+    #   commands:
+    # #     - /run.sh server
 
-  volumes:
-  - name: dockersock
-    temp: {}
+    # volumes:
+    # - name: dockersock
+    #   temp: {}
